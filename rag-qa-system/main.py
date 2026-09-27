@@ -8,7 +8,7 @@ import chromadb
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 
-# --- Setup (runs once, when the server starts) ---
+
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 client = genai.Client(api_key=api_key)
@@ -18,7 +18,7 @@ collection = chroma_client.get_or_create_collection("documents")
 
 app = FastAPI()
 
-# --- Endpoint 1: Upload a document ---
+
 @app.post("/documents/upload")
 def upload_document(file: UploadFile = File(...)):
     save_path = f"data/uploads/{file.filename}"
@@ -27,7 +27,7 @@ def upload_document(file: UploadFile = File(...)):
     return {"filename": file.filename, "message": "Uploaded successfully"}
 
 
-# --- Endpoint 2: Process a document (extract, chunk, embed, store) ---
+
 class ProcessRequest(BaseModel):
     filename: str
 
@@ -35,17 +35,16 @@ class ProcessRequest(BaseModel):
 def process_document(request: ProcessRequest):
     filepath = f"data/uploads/{request.filename}"
 
-    # Extract
     doc = pymupdf.open(filepath)
     full_text = ""
     for page in doc:
         full_text += page.get_text()
 
-    # Chunk
+    
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     chunks = splitter.split_text(full_text)
 
-    # Embed each chunk
+    
     embeddings = []
     for chunk in chunks:
         result = client.models.embed_content(
@@ -54,7 +53,7 @@ def process_document(request: ProcessRequest):
         )
         embeddings.append(result.embeddings[0].values)
 
-    # Store in ChromaDB
+    
     existing_count = collection.count()
     collection.add(
         documents=chunks,
@@ -66,7 +65,7 @@ def process_document(request: ProcessRequest):
     return {"filename": request.filename, "chunks_indexed": len(chunks)}
 
 
-# --- Endpoint 3: Ask a question ---
+
 class AskRequest(BaseModel):
     question: str
 
