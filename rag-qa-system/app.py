@@ -6,7 +6,7 @@ API_URL = "http://127.0.0.1:8000"
 st.title("📄 AI Document Q&A")
 st.write("Upload a PDF and ask questions about it.")
 
-# --- Section 1: Upload & Process ---
+
 st.header("1. Upload a document")
 uploaded_file = st.file_uploader("Choose a PDF", type="pdf")
 
@@ -33,7 +33,7 @@ if uploaded_file is not None:
         else:
             st.error("Upload failed.")
 
-# --- Section 2: Ask Questions ---
+
 st.header("2. Ask a question")
 question = st.text_input("Type your question here")
 
